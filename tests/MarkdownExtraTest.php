@@ -104,6 +104,32 @@ class MarkdownExtraTest extends TestCase
     }
 
     /**
+     * @test
+     */
+    public function doFencedCodeBlocksWithTitleAttributeAndItsDivUsingSlash()
+    {
+        $this->MarkdownExtra->fcb_output_title = true;
+        $this->MarkdownExtra->fcb_title_div_class = 'myClassName';
+        $html = $this->MarkdownExtra->transform($this->getSampleMarkdownTextWithExtraAttributesUsingSlash());
+
+        $this->assertContains('<div class="myClassName">aaa/bbb/ccc.php</div><pre><code id="baz" class="bar" lang="en" title="aaa/bbb/ccc.php">', $html);
+        $this->assertContains('</code></pre>', $html);
+    }
+
+    /**
+     * @test
+     */
+    public function doFencedCodeBlocksWithTitleAttributeAndItsDivUsingSlash2()
+    {
+        $this->MarkdownExtra->fcb_output_title = true;
+        $this->MarkdownExtra->fcb_title_div_class = 'myClassName';
+        $html = $this->MarkdownExtra->transform($this->getSampleMarkdownTextWithExtraAttributesUsingSlash2());
+
+        $this->assertContains('<div class="myClassName">/aaa/bbb/ccc.php</div><pre><code id="baz" class="bar" lang="en" title="/aaa/bbb/ccc.php">', $html);
+        $this->assertContains('</code></pre>', $html);
+    }
+
+    /**
      * @return string
      */
     private function getSampleMarkdownText()
@@ -197,4 +223,43 @@ bbb
 EOD;
         return $markdownText;
     }
+
+    /**
+     * @return string
+     */
+    private function getSampleMarkdownTextWithExtraAttributesUsingSlash()
+    {
+        $markdownText = <<<EOD
+aaa
+
+~~~ {.bar #baz lang=en title=aaa/bbb/ccc.php}
+function foo() {
+    echo 'hello';
+}
+~~~
+
+bbb
+EOD;
+        return $markdownText;
+    }
+
+    /**
+     * @return string
+     */
+    private function getSampleMarkdownTextWithExtraAttributesUsingSlash2()
+    {
+        $markdownText = <<<EOD
+aaa
+
+~~~ {.bar #baz lang=en title=/aaa/bbb/ccc.php}
+function foo() {
+    echo 'hello';
+}
+~~~
+
+bbb
+EOD;
+        return $markdownText;
+    }
+
 }

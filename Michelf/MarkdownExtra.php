@@ -137,6 +137,8 @@ class MarkdownExtra extends \Michelf\Markdown {
 
 	# Expression to use to catch attributes (includes the braces)
 	protected $id_class_attr_catch_re = '\{((?:[ ]*[#.a-z][-_:a-zA-Z0-9=]+){1,})[ ]*\}';
+    # Expression to use to catch attributes (includes the braces) for Fenced Code Block
+    protected $id_class_attr_catch_re_fcb = '\{((?:[ ]*(?:(?:[#.]{1}[-_:a-zA-Z0-9]+)|(?:[a-zA-Z0-9]+=[-_:a-zA-Z0-9\/.]+))+){1,})[ ]*\}';
 	# Expression to use when parsing in a context when no capture is desired
 	protected $id_class_attr_nocatch_re = '\{(?:[ ]*[#.a-z][-_:a-zA-Z0-9=]+){1,}[ ]*\}';
 
@@ -153,7 +155,8 @@ class MarkdownExtra extends \Michelf\Markdown {
 		if (empty($attr) && !$defaultIdValue) return "";
 		
 		# Split on components
-		preg_match_all('/[#.a-z][-_:a-zA-Z0-9=]+/', $attr, $matches);
+		//preg_match_all('/[#.a-z][-_:a-zA-Z0-9=]+/', $attr, $matches); // original
+        preg_match_all('/(?:(?:[#.]{1}[-_:a-zA-Z0-9]+)|(?:[a-zA-Z0-9]+=[-_:a-zA-Z0-9\/.]+))+/', $attr, $matches);
 		$elements = $matches[0];
 
 		# handle classes and ids (only first id taken into account)
@@ -1289,7 +1292,7 @@ class MarkdownExtra extends \Michelf\Markdown {
 	# ~~~
 	#
 		$less_than_tab = $this->tab_width;
-		
+
 		$text = preg_replace_callback('{
 				(?:\n|\A)
 				# 1: Opening marker
@@ -1300,7 +1303,7 @@ class MarkdownExtra extends \Michelf\Markdown {
 				(?:
 					\.?([-_:a-zA-Z0-9]+) # 2: standalone class name
 				|
-					'.$this->id_class_attr_catch_re.' # 3: Extra attributes
+					'.$this->id_class_attr_catch_re_fcb.' # 3: Extra attributes
 				)?
 				[ ]* \n # Whitespace and newline following marker.
 				
