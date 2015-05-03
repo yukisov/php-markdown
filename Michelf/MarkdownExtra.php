@@ -46,6 +46,11 @@ class MarkdownExtra extends \Michelf\Markdown {
 	# Predefined abbreviations.
 	public $predef_abbr = array();
 
+    # Optional output title value in extra attributes of Fenced code blocks as div tag
+    public $fcb_output_title = false;
+    # Class attribute of its div tag
+    public $fcb_title_div_class = "";
+
 	### Parser Implementation ###
 
 	public function __construct() {
@@ -1329,9 +1334,31 @@ class MarkdownExtra extends \Michelf\Markdown {
 		} else {
 			$attr_str = $this->doExtraAttributes($this->code_attr_on_pre ? "pre" : "code", $attrs);
 		}
+
+        if ($this->fcb_output_title) {
+            $fcb_title_div = call_user_func(function() use($attr_str) {
+                $attrs = explode(' ', $attr_str);
+                foreach ($attrs as $attr) {
+                    if (strpos($attr, '=') === false) continue;
+                    list($key, $val) = explode('=', $attr);
+                    if ($key === 'title') {
+                        if ($this->fcb_title_div_class != "") {
+                            $class = ' class="' . htmlentities($this->fcb_title_div_class, ENT_QUOTES) . '"';
+                        } else {
+                            $class = '';
+                        }
+                        return '<div' . $class . '>' . trim($val, " \t\n\r\0\x0B\"") . '</div>';
+                    }
+                }
+                return '';
+            });
+        }  else {
+            $fcb_title_div = '';
+        }
+
 		$pre_attr_str  = $this->code_attr_on_pre ? $attr_str : '';
 		$code_attr_str = $this->code_attr_on_pre ? '' : $attr_str;
-		$codeblock  = "<pre$pre_attr_str><code$code_attr_str>$codeblock</code></pre>";
+		$codeblock  = "<pre$pre_attr_str><code$code_attr_str>${fcb_title_div}$codeblock</code></pre>";
 		
 		return "\n\n".$this->hashBlock($codeblock)."\n\n";
 	}

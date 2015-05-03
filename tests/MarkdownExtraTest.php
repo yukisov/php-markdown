@@ -66,6 +66,33 @@ class MarkdownExtraTest extends TestCase
     }
 
     /**
+     * @test
+     */
+    public function doFencedCodeBlocksWithTitleAttributeAndItsDiv()
+    {
+        $this->MarkdownExtra->fcb_output_title = true;
+        $html = $this->MarkdownExtra->transform($this->getSampleMarkdownTextWithTitleAttribute());
+
+        $this->assertContains('<pre><code id="baz" class="bar" title="abcdefg">', $html);
+        $this->assertContains('<div>abcdefg</div>', $html);
+        $this->assertContains('</code></pre>', $html);
+    }
+
+    /**
+     * @test
+     */
+    public function doFencedCodeBlocksWithTitleAttributeAndItsDiv2()
+    {
+        $this->MarkdownExtra->fcb_output_title = true;
+        $this->MarkdownExtra->fcb_title_div_class = 'myClassName';
+        $html = $this->MarkdownExtra->transform($this->getSampleMarkdownTextWithTitleAttribute());
+
+        $this->assertContains('<pre><code id="baz" class="bar" title="abcdefg">', $html);
+        $this->assertContains('<div class="myClassName">abcdefg</div>', $html);
+        $this->assertContains('</code></pre>', $html);
+    }
+
+    /**
      * @return string
      */
     private function getSampleMarkdownText()
