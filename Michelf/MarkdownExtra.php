@@ -1347,7 +1347,7 @@ class MarkdownExtra extends \Michelf\Markdown {
                         } else {
                             $class = '';
                         }
-                        return '<div' . $class . '>' . trim($val, " \t\n\r\0\x0B\"") . '</div>';
+                        return '<div' . $class . '>' . htmlentities(trim($val, " \t\n\r\0\x0B\""), ENT_QUOTES) . '</div>';
                     }
                 }
                 return '';
@@ -1358,7 +1358,7 @@ class MarkdownExtra extends \Michelf\Markdown {
 
 		$pre_attr_str  = $this->code_attr_on_pre ? $attr_str : '';
 		$code_attr_str = $this->code_attr_on_pre ? '' : $attr_str;
-		$codeblock  = "<pre$pre_attr_str><code$code_attr_str>${fcb_title_div}$codeblock</code></pre>";
+		$codeblock  = "${fcb_title_div}<pre$pre_attr_str><code$code_attr_str>$codeblock</code></pre>";
 		
 		return "\n\n".$this->hashBlock($codeblock)."\n\n";
 	}
