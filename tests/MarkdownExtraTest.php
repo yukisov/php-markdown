@@ -130,6 +130,35 @@ class MarkdownExtraTest extends TestCase
     }
 
     /**
+     * @test
+     */
+    public function headerLinkIconEnabled()
+    {
+        $this->MarkdownExtra->hli_enable = true;
+        $this->MarkdownExtra->hli_icon_html = '<i class="fa fa-link"></i>';
+        $this->MarkdownExtra->hli_anchor_class = 'header-link-anchor';
+        $html = $this->MarkdownExtra->transform($this->getSampleMarkdownTextWithHeaderLinkIcon());
+
+        $this->assertContains('<h3><span id="3-3" class="header-link-anchor"></span>', $html);
+        $this->assertContains('<a href="#4-2">', $html);
+        $this->assertContains('<i class="fa fa-link"></i>', $html);
+        $this->assertContains('<span>H4-2</span>', $html);
+    }
+
+    /**
+     * @test
+     */
+    public function headerLinkIconDisabled()
+    {
+        $this->MarkdownExtra->hli_enable = false;
+        $html = $this->MarkdownExtra->transform($this->getSampleMarkdownTextWithHeaderLinkIcon());
+
+        $this->assertContains('<h2>H2-1</h2>', $html);
+        $this->assertContains('<h3>H3-3</h3>', $html);
+        $this->assertContains('<h4>H4-2</h4>', $html);
+    }
+
+    /**
      * @return string
      */
     private function getSampleMarkdownText()
@@ -258,6 +287,58 @@ function foo() {
 ~~~
 
 bbb
+EOD;
+        return $markdownText;
+    }
+
+    /**
+     * @return string
+     */
+    private function getSampleMarkdownTextWithHeaderLinkIcon()
+    {
+        $markdownText = <<<EOD
+aaa
+
+# H1-1
+
+bbb
+
+## H2-1
+
+ccc
+
+## H2-2
+
+ddd
+
+### H3-1
+
+eee
+
+### H3-2
+
+fff
+
+# H1-2
+
+ggg
+
+## H2-3
+
+hhh
+
+### H3-3
+
+iii
+
+#### H4-1
+
+jjj
+
+#### H4-2
+
+kkk
+
 EOD;
         return $markdownText;
     }

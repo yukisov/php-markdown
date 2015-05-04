@@ -51,6 +51,16 @@ class MarkdownExtra extends \Michelf\Markdown {
     # Class attribute of its div tag
     public $fcb_title_div_class = "";
 
+    # Optional output link icon on headers (Header Link Icon)
+    public $hli_enable = false;
+    # Icon HTML
+    public $hli_icon_html = '<i class="fa fa-link"></i>';
+    public $hli_anchor_class = 'header-link-anchor';
+    # save sequence number for each "H" tag
+    private $hli_increments = array(
+        1 => 0, 2 => 0, 3 => 0, 4 => 0, 5 => 0, 6 => 0,
+    );
+
 	### Parser Implementation ###
 
 	public function __construct() {
@@ -999,9 +1009,9 @@ class MarkdownExtra extends \Michelf\Markdown {
 		$level = $matches[3]{0} == '=' ? 1 : 2;
 
 		$defaultId = is_callable($this->header_id_func) ? call_user_func($this->header_id_func, $matches[1]) : null;
-
 		$attr  = $this->doExtraAttributes("h$level", $dummy =& $matches[2], $defaultId);
-		$block = "<h$level$attr>".$this->runSpanGamut($matches[1])."</h$level>";
+		$htmlTmp = $this->_addHeaderLink($level, $this->runSpanGamut($matches[2]));
+		$block = "<h$level$attr>".$htmlTmp."</h$level>";
 		return "\n" . $this->hashBlock($block) . "\n\n";
 	}
 	protected function _doHeaders_callback_atx($matches) {
@@ -1009,10 +1019,31 @@ class MarkdownExtra extends \Michelf\Markdown {
 
 		$defaultId = is_callable($this->header_id_func) ? call_user_func($this->header_id_func, $matches[2]) : null;
 		$attr  = $this->doExtraAttributes("h$level", $dummy =& $matches[3], $defaultId);
-		$block = "<h$level$attr>".$this->runSpanGamut($matches[2])."</h$level>";
-		return "\n" . $this->hashBlock($block) . "\n\n";
+		$htmlTmp = $this->_addHeaderLink($level, $this->runSpanGamut($matches[2]));
+		$block = "<h$level$attr>".$htmlTmp."</h$level>";
+		return "\n".$this->hashBlock($block)."\n\n";
 	}
 
+    protected function _addHeaderLink($level, $text) {
+
+        if (! $this->hli_enable) {
+            return $text;
+        }
+
+        $level_num = $level . '-' . ($this->hli_increments[$level] + 1);
+
+        // No need HTML escaping because all values are under our control.
+        $html = '<span id="' . $level_num . '" class="' . $this->hli_anchor_class . '"></span>' . "\n"
+            . '  <a href="#' . $level_num . '">' . "\n"
+            . '    ' . $this->hli_icon_html . "\n"
+            . '  </a>' . "\n"
+            . '<span>' . $text . '</span>' . "\n"
+            ;
+
+        $this->hli_increments[$level] += 1;
+
+        return $html;
+    }
 
 	protected function doTables($text) {
 	#
