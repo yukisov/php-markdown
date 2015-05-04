@@ -54,6 +54,7 @@ class MarkdownExtra extends \Michelf\Markdown {
     # Optional output link icon on headers (Header Link Icon)
     public $hli_enable = false;
     # Icon HTML
+    public $hli_id_prefix = '';
     public $hli_icon_html = '<i class="fa fa-link"></i>';
     public $hli_anchor_class = 'header-link-anchor';
     # save sequence number for each "H" tag
@@ -1030,7 +1031,7 @@ class MarkdownExtra extends \Michelf\Markdown {
             return $text;
         }
 
-        $level_num = $level . '-' . ($this->hli_increments[$level] + 1);
+        $level_num = $this->hli_id_prefix . $level . '-' . ($this->hli_increments[$level] + 1);
 
         // No need HTML escaping because all values are under our control.
         $html = '<span id="' . $level_num . '" class="' . $this->hli_anchor_class . '"></span>' . "\n"
