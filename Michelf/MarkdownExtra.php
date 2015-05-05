@@ -1031,6 +1031,11 @@ class MarkdownExtra extends \Michelf\Markdown {
             return $text;
         }
 
+        // Not add a link in Blockquote tag
+        if ($this->current_block_quotes_depth > 0) {
+            return $text;
+        }
+
         $level_num = $this->hli_id_prefix . $level . '-' . ($this->hli_increments[$level] + 1);
 
         // No need HTML escaping because all values are under our control.

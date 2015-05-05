@@ -1204,8 +1204,12 @@ class Markdown implements MarkdownInterface {
 		return $text_stack[0];
 	}
 
+    protected $current_block_quotes_depth = 0;
 
 	protected function doBlockQuotes($text) {
+
+        $this->current_block_quotes_depth++;
+
 		$text = preg_replace_callback('/
 			  (								# Wrap whole match in $1
 				(?>
@@ -1217,6 +1221,8 @@ class Markdown implements MarkdownInterface {
 			  )
 			/xm',
 			array($this, '_doBlockQuotes_callback'), $text);
+
+        $this->current_block_quotes_depth--;
 
 		return $text;
 	}

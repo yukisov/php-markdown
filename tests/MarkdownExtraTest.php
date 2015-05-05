@@ -170,6 +170,18 @@ class MarkdownExtraTest extends TestCase
         $this->assertContains('<h1>bbbbbb</h1>', $html2);
     }
 
+    /**
+     * @test
+     */
+    public function headerUnderBlockquote_should_be_NG()
+    {
+        $this->MarkdownExtra->hli_enable = true;
+        $html = $this->MarkdownExtra->transform($this->getSampleMarkdownHeaderUnderBlockquote());
+
+        $this->assertContains('<h1>TitleB</h1>', $html);
+    }
+
+
     //----------------
     // Html Sample
     //----------------
@@ -387,6 +399,25 @@ aaa
 # bbbbbb
 
 cccc
+
+EOD;
+        return $markdownText;
+    }
+
+    /**
+     * @return string
+     */
+    private function getSampleMarkdownHeaderUnderBlockquote()
+    {
+        $markdownText = <<<EOD
+
+# TitleA
+
+> # TitleB
+>
+> cccc
+
+ddd
 
 EOD;
         return $markdownText;
