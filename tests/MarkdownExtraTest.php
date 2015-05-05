@@ -159,6 +159,22 @@ class MarkdownExtraTest extends TestCase
     }
 
     /**
+     * @test
+     */
+    public function seTextHeading()
+    {
+        $html1 = $this->MarkdownExtra->transform($this->getSampleMarkdownSetextHeading());
+        $html2 = $this->MarkdownExtra->transform($this->getSampleMarkdownAtxHeading());
+
+        $this->assertContains('<h1>bbbbbb</h1>', $html1);
+        $this->assertContains('<h1>bbbbbb</h1>', $html2);
+    }
+
+    //----------------
+    // Html Sample
+    //----------------
+
+    /**
      * @return string
      */
     private function getSampleMarkdownText()
@@ -338,6 +354,39 @@ jjj
 #### H4-2
 
 kkk
+
+EOD;
+        return $markdownText;
+    }
+
+    /**
+     * @return string
+     */
+    private function getSampleMarkdownSetextHeading()
+    {
+        $markdownText = <<<EOD
+aaa
+
+bbbbbb
+======
+
+cccc
+
+EOD;
+        return $markdownText;
+    }
+
+    /**
+     * @return string
+     */
+    private function getSampleMarkdownAtxHeading()
+    {
+        $markdownText = <<<EOD
+aaa
+
+# bbbbbb
+
+cccc
 
 EOD;
         return $markdownText;

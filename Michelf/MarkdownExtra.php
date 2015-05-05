@@ -1011,7 +1011,7 @@ class MarkdownExtra extends \Michelf\Markdown {
 
 		$defaultId = is_callable($this->header_id_func) ? call_user_func($this->header_id_func, $matches[1]) : null;
 		$attr  = $this->doExtraAttributes("h$level", $dummy =& $matches[2], $defaultId);
-		$htmlTmp = $this->_addHeaderLink($level, $this->runSpanGamut($matches[2]));
+		$htmlTmp = $this->_addHeaderLink($level, $this->runSpanGamut($matches[1]));
 		$block = "<h$level$attr>".$htmlTmp."</h$level>";
 		return "\n" . $this->hashBlock($block) . "\n\n";
 	}
