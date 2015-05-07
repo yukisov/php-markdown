@@ -132,6 +132,20 @@ class MarkdownExtraTest extends TestCase
     /**
      * @test
      */
+    public function doFencedCodeBlocksWithTitleAttributeAndItsDivUsingJapanese()
+    {
+        $this->MarkdownExtra->fcb_output_title = true;
+        $this->MarkdownExtra->fcb_title_div_class = 'myClassName';
+        $html = $this->MarkdownExtra->transform($this->getSampleMarkdownTextWithExtraAttributesUsingJapanese());
+
+        $this->assertContains('<div class="myClassName">例</div><pre><code id="baz" class="bar" lang="en" title="例">', $html);
+        $this->assertContains('</code></pre>', $html);
+    }
+
+
+    /**
+     * @test
+     */
     public function headerLinkIconEnabled()
     {
         $this->MarkdownExtra->hli_enable = true;
@@ -309,6 +323,25 @@ EOD;
 aaa
 
 ~~~ {.bar #baz lang=en title=/aaa/bbb/ccc.php}
+function foo() {
+    echo 'hello';
+}
+~~~
+
+bbb
+EOD;
+        return $markdownText;
+    }
+
+    /**
+     * @return string
+     */
+    private function getSampleMarkdownTextWithExtraAttributesUsingJapanese()
+    {
+        $markdownText = <<<EOD
+aaa
+
+~~~ {.bar #baz lang=en title=例}
 function foo() {
     echo 'hello';
 }
