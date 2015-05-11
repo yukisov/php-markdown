@@ -195,6 +195,31 @@ class MarkdownExtraTest extends TestCase
         $this->assertContains('<h1>TitleB</h1>', $html);
     }
 
+    /**
+     * @test
+     */
+    public function doFencedCodeBlocksWithTitleAttributeAndItsDivUsingParenthesis()
+    {
+        $this->MarkdownExtra->fcb_output_title = true;
+        $this->MarkdownExtra->fcb_title_div_class = 'myClassName';
+        $html = $this->MarkdownExtra->transform($this->getSampleMarkdownTextWithExtraAttributesUsingParenthesis());
+
+        $this->assertContains('<div class="myClassName">日本語(括弧)</div><pre><code id="baz" class="bar" lang="en" title="日本語(括弧)">', $html);
+        $this->assertContains('</code></pre>', $html);
+    }
+
+    /**
+     * @test
+     */
+    public function doFencedCodeBlocksWithTitleAttributeAndItsDivUsingParenthesis2()
+    {
+        $this->MarkdownExtra->fcb_output_title = true;
+        $this->MarkdownExtra->fcb_title_div_class = 'myClassName';
+        $html = $this->MarkdownExtra->transform($this->getSampleMarkdownTextWithExtraAttributesUsingParenthesis2());
+
+        $this->assertContains('<div class="myClassName">日本語（括弧）</div><pre><code id="baz" class="bar" lang="en" title="日本語（括弧）">', $html);
+        $this->assertContains('</code></pre>', $html);
+    }
 
     //----------------
     // Html Sample
@@ -452,6 +477,44 @@ EOD;
 
 ddd
 
+EOD;
+        return $markdownText;
+    }
+
+    /**
+     * @return string
+     */
+    private function getSampleMarkdownTextWithExtraAttributesUsingParenthesis()
+    {
+        $markdownText = <<<EOD
+aaa
+
+~~~ {.bar #baz lang=en title=日本語(括弧)}
+function foo() {
+    echo 'hello';
+}
+~~~
+
+bbb
+EOD;
+        return $markdownText;
+    }
+
+    /**
+     * @return string
+     */
+    private function getSampleMarkdownTextWithExtraAttributesUsingParenthesis2()
+    {
+        $markdownText = <<<EOD
+aaa
+
+~~~ {.bar #baz lang=en title=日本語（括弧）}
+function foo() {
+    echo 'hello';
+}
+~~~
+
+bbb
 EOD;
         return $markdownText;
     }
