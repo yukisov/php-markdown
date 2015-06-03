@@ -12,6 +12,7 @@
 #
 namespace Michelf;
 
+use PHPHtmlParser\Dom;
 
 #
 # Markdown Extra Parser Class
@@ -149,7 +150,7 @@ class MarkdownExtra extends \Michelf\Markdown {
 	# Expression to use to catch attributes (includes the braces)
 	protected $id_class_attr_catch_re = '\{((?:[ ]*[#.a-z][-_:a-zA-Z0-9=]+){1,})[ ]*\}';
     # Expression to use to catch attributes (includes the braces) for Fenced Code Block
-    protected $id_class_attr_catch_re_fcb = '\{((?:[ ]*(?:(?:[#.]{1}[-_:a-zA-Z0-9]+)|(?:[a-zA-Z0-9]+=[\w-_:\/.\(\)\（\）]+))+){1,})[ ]*\}';
+	protected $id_class_attr_catch_re_fcb = '\{((?:[ ]*(?:(?:[#.]{1}[-_:a-zA-Z0-9]+)|(?:[a-zA-Z0-9]+=[ "\'\w-_:\/.,\(\)\（\）]+))+){1,})[ ]*\}';
 	# Expression to use when parsing in a context when no capture is desired
 	protected $id_class_attr_nocatch_re = '\{(?:[ ]*[#.a-z][-_:a-zA-Z0-9=]+){1,}[ ]*\}';
 
@@ -167,22 +168,27 @@ class MarkdownExtra extends \Michelf\Markdown {
 		
 		# Split on components
 		//preg_match_all('/[#.a-z][-_:a-zA-Z0-9=]+/', $attr, $matches); // original
-        preg_match_all('/(?:(?:[#.]{1}[-_:a-zA-Z0-9]+)|(?:[a-zA-Z0-9]+=[\w-_:\/.\(\)\（\）]+))+/u', $attr, $matches);
+		preg_match_all('/(?:(?:[#.]{1}[-_:a-zA-Z0-9]+)|(?:[a-zA-Z0-9]+=[\w-_:\/.\(\)\（\）]+)|(?:[a-zA-Z0-9]+=["\']{1}[ \w-_:\/.,\(\)\（\）]+["\']{1}))+/u', $attr, $matches);
 		$elements = $matches[0];
 
 		# handle classes and ids (only first id taken into account)
 		$classes = array();
-		$attributes = array();
 		$id = false;
 		foreach ($elements as $element) {
 			if ($element{0} == '.') {
 				$classes[] = substr($element, 1);
 			} else if ($element{0} == '#') {
-				if ($id === false) $id = substr($element, 1);
-			} else if (strpos($element, '=') > 0) {
-				$parts = explode('=', $element, 2);
-				$attributes[] = $parts[0] . '="' . $parts[1] . '"';
+				if ($id === false) {
+				 	$id = substr($element, 1);
+                }
 			}
+		}
+
+		$attributes = array();
+		$attrs_str = trim(preg_replace('/(?<![\w-_:\/.\(\)\（\）])[#.]{1}[-_:a-zA-Z0-9]+/u', '', $attr));
+		if ($attrs_str != '') {
+		 	$attrs_tmp = $this->getAttributesUsingParser($attrs_str);
+			$attributes = array_merge($attributes, $attrs_tmp);
 		}
 
 		if (!$id) $id = $defaultIdValue;
@@ -1376,22 +1382,7 @@ class MarkdownExtra extends \Michelf\Markdown {
 		}
 
         if ($this->fcb_output_title) {
-            $fcb_title_div = call_user_func(function() use($attr_str) {
-                $attrs = explode(' ', $attr_str);
-                foreach ($attrs as $attr) {
-                    if (strpos($attr, '=') === false) continue;
-                    list($key, $val) = explode('=', $attr);
-                    if ($key === 'title') {
-                        if ($this->fcb_title_div_class != "") {
-                            $class = ' class="' . htmlentities($this->fcb_title_div_class, ENT_QUOTES) . '"';
-                        } else {
-                            $class = '';
-                        }
-                        return '<div' . $class . '>' . htmlentities(trim($val, " \t\n\r\0\x0B\""), ENT_QUOTES) . '</div>';
-                    }
-                }
-                return '';
-            });
+            $fcb_title_div = $this->getTitleDivForFcb($attr_str);
         }  else {
             $fcb_title_div = '';
         }
@@ -1399,7 +1390,7 @@ class MarkdownExtra extends \Michelf\Markdown {
 		$pre_attr_str  = $this->code_attr_on_pre ? $attr_str : '';
 		$code_attr_str = $this->code_attr_on_pre ? '' : $attr_str;
 		$codeblock  = "${fcb_title_div}<pre$pre_attr_str><code$code_attr_str>$codeblock</code></pre>";
-		
+
 		return "\n\n".$this->hashBlock($codeblock)."\n\n";
 	}
 	protected function _doFencedCodeBlocks_newlines($matches) {
@@ -1678,4 +1669,46 @@ class MarkdownExtra extends \Michelf\Markdown {
 			return $matches[0];
 		}
 	}
+
+    /**
+     * @param $attr_str
+     * @return string
+     */
+    private function getTitleDivForFcb($attr_str)
+    {
+        $html = sprintf('<div %s></div>', $attr_str);
+        $dom = new Dom;
+        $dom->load($html);
+        $a = $dom->find('div')[0];
+        $title = $a->getAttribute('title');
+        if (! is_null($title)) {
+            if ($this->fcb_title_div_class != "") {
+                $class = ' class="' . htmlentities($this->fcb_title_div_class, ENT_QUOTES) . '"';
+            } else {
+                $class = '';
+            }
+            // $title must already be HTML escaped!
+            return '<div' . $class . '>' . trim($title, " \t\n\r\0\x0B\"") . '</div>';
+        }
+        return '';
+    }
+
+    /**
+     * @param $attrs_str
+     * @return array
+     */
+    private function getAttributesUsingParser($attrs_str)
+    {
+        $html = sprintf('<div %s></div>', $attrs_str);
+        $dom = new Dom;
+        $dom->load($html);
+        $a = $dom->find('div')[0];
+        $attrs = $a->getAttributes();
+
+        $attrs_r = [];
+        foreach ($attrs as $key => $val) {
+            $attrs_r[] = $key . '="' . htmlspecialchars($val, ENT_QUOTES) . '"';
+        }
+        return $attrs_r;
+    }
 }

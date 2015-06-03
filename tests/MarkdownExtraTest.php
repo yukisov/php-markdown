@@ -221,6 +221,60 @@ class MarkdownExtraTest extends TestCase
         $this->assertContains('</code></pre>', $html);
     }
 
+    /**
+     * @test
+     */
+    public function doFencedCodeBlocksWithTitleAttributeDoubleQuotedAndItsDivUsingParenthesis()
+    {
+        $this->MarkdownExtra->fcb_output_title = true;
+        $this->MarkdownExtra->fcb_title_div_class = 'myClassName';
+        $html = $this->MarkdownExtra->transform($this->getSampleMarkdownTextWithExtraAttributesDoubleQuotedUsingParenthesis());
+        $this->assertContains('<div class="myClassName">Hello, World</div><pre><code id="baz" class="bar" lang="en" title="Hello, World">', $html);
+        $this->assertContains('</code></pre>', $html);
+    }
+
+    /**
+     * @test
+     */
+    public function doFencedCodeBlocksWithTitleAttributeSingleQuotedAndItsDivUsingParenthesis()
+    {
+        $this->MarkdownExtra->fcb_output_title = true;
+        $this->MarkdownExtra->fcb_title_div_class = 'myClassName';
+        $html = $this->MarkdownExtra->transform($this->getSampleMarkdownTextWithExtraAttributesSingleQuotedUsingParenthesis());
+        $this->assertContains('<div class="myClassName">Hello, World</div><pre><code id="baz" class="bar" lang="en" title="Hello, World">', $html);
+        $this->assertContains('</code></pre>', $html);
+    }
+
+    /**
+     * @test
+     */
+    public function doFencedCodeBlocksWithTitleAttributeDoubleQuotedAndItsDivUsingParenthesis2()
+    {
+        $this->MarkdownExtra->fcb_output_title = true;
+        $this->MarkdownExtra->fcb_title_div_class = 'myClassName';
+        $html = $this->MarkdownExtra->transform($this->getSampleMarkdownTextWithExtraAttributesDoubleQuotedUsingParenthesis2());
+        $this->assertContains('<div class="myClassName">Hello, &#039;Taro&#039;</div><pre><code id="baz" class="bar" lang="en" title="Hello, &#039;Taro&#039;">', $html);
+        $this->assertContains('</code></pre>', $html);
+    }
+    /**
+     * @test
+     */
+    public function regex1()
+    {
+        $regex = '@\{((?:[ ]*(?:(?:[#.]{1}[-_:a-zA-Z0-9]+)|(?:[a-zA-Z0-9]+=[\w-_:\/.\(\)\（\）]+)|(?:[a-zA-Z0-9]+=["\']{1}[ \w-_:\/.\(\)\（\）]+["\']{1}))+){1,})[ ]*\}@';
+        $arr = [
+            '{ .foo title=bar }',
+            '{ .foo title="bar" }',
+            '{ .foo title="bar baz" }',
+            '{ .foo title=\'bar baz\' }',
+        ];
+        foreach ($arr as $str) {
+            $res = preg_match($regex, $str);
+            $this->assertSame(1, $res);
+        }
+    }
+
+
     //----------------
     // Html Sample
     //----------------
@@ -509,6 +563,54 @@ EOD;
 aaa
 
 ~~~ {.bar #baz lang=en title=日本語（括弧）}
+function foo() {
+    echo 'hello';
+}
+~~~
+
+bbb
+EOD;
+        return $markdownText;
+    }
+
+    private function getSampleMarkdownTextWithExtraAttributesDoubleQuotedUsingParenthesis()
+    {
+        $markdownText = <<<EOD
+aaa
+
+~~~ {.bar #baz lang=en title="Hello, World" }
+function foo() {
+    echo 'hello';
+}
+~~~
+
+bbb
+EOD;
+        return $markdownText;
+    }
+
+    private function getSampleMarkdownTextWithExtraAttributesSingleQuotedUsingParenthesis()
+    {
+        $markdownText = <<<EOD
+aaa
+
+~~~ {.bar #baz lang=en title='Hello, World' }
+function foo() {
+    echo 'hello';
+}
+~~~
+
+bbb
+EOD;
+        return $markdownText;
+    }
+
+    private function getSampleMarkdownTextWithExtraAttributesDoubleQuotedUsingParenthesis2()
+    {
+        $markdownText = <<<EOD
+aaa
+
+~~~ {.bar #baz lang=en title="Hello, 'Taro'" }
 function foo() {
     echo 'hello';
 }
