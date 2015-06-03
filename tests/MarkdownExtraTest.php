@@ -99,8 +99,9 @@ class MarkdownExtraTest extends TestCase
         $this->MarkdownExtra->fcb_title_div_class = 'myClassName';
         $html = $this->MarkdownExtra->transform($this->getSampleMarkdownTextWithExtraAttributes3());
 
-        // Output raw data because the parser could not understand this markdown text.
-        $this->assertContains('~~~ {.bar #baz lang=en title=<script>alert(1)</script>}', $html);
+        // "<script>" tag is output as it is.
+        $this->assertContains('<div class="myClassName"><script>alert(1)</script></div><pre><code id="baz" class="bar" lang="en" title="<script>alert(1)</script>">', $html);
+        $this->assertContains('</code></pre>', $html);
     }
 
     /**
@@ -256,6 +257,19 @@ class MarkdownExtraTest extends TestCase
         $this->assertContains('<div class="myClassName">Hello, &#039;Taro&#039;</div><pre><code id="baz" class="bar" lang="en" title="Hello, &#039;Taro&#039;">', $html);
         $this->assertContains('</code></pre>', $html);
     }
+
+    /**
+     * @test
+     */
+    public function doFencedCodeBlocksWithTitleAttributeDoubleQuotedAndItsDivUsingParenthesis3()
+    {
+        $this->MarkdownExtra->fcb_output_title = true;
+        $this->MarkdownExtra->fcb_title_div_class = 'myClassName';
+        $html = $this->MarkdownExtra->transform($this->getSampleMarkdownTextWithExtraAttributesDoubleQuotedUsingParenthesis3());
+        $this->assertContains('<div class="myClassName">foo bar.php スペースも 使えるよ！</div><pre><code id="baz" class="bar" lang="en" title="foo bar.php スペースも 使えるよ！">', $html);
+        $this->assertContains('</code></pre>', $html);
+    }
+
     /**
      * @test
      */
@@ -611,6 +625,22 @@ EOD;
 aaa
 
 ~~~ {.bar #baz lang=en title="Hello, 'Taro'" }
+function foo() {
+    echo 'hello';
+}
+~~~
+
+bbb
+EOD;
+        return $markdownText;
+    }
+
+    private function getSampleMarkdownTextWithExtraAttributesDoubleQuotedUsingParenthesis3()
+    {
+        $markdownText = <<<EOD
+aaa
+
+~~~ {.bar #baz lang=en title="foo bar.php スペースも 使えるよ！" }
 function foo() {
     echo 'hello';
 }
