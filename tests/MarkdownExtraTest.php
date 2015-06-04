@@ -273,6 +273,19 @@ class MarkdownExtraTest extends TestCase
     /**
      * @test
      */
+    public function doFencedCodeBlocksWithTitleAttributeDoubleQuotedAndItsDivUsingParenthesis4()
+    {
+        $this->MarkdownExtra->fcb_output_title = true;
+        $this->MarkdownExtra->fcb_title_div_class = 'myClassName';
+        $html = $this->MarkdownExtra->transform($this->getSampleMarkdownTextWithExtraAttributesDoubleQuotedUsingParenthesis4());
+        $this->assertContains('<div class="myClassName">foo bar.php スペースも 使えるよ！</div><pre><code id="baz" class="bar" lang="en" title="foo bar.php スペースも 使えるよ！">', $html);
+        $this->assertContains('<div class="myClassName">FOO BAR.php あいうえお！</div><pre><code id="foo" class="baz" lang="jp" title="FOO BAR.php あいうえお！">', $html);
+        $this->assertContains('</code></pre>', $html);
+    }
+
+    /**
+     * @test
+     */
     public function regex1()
     {
         $regex = '@\{((?:[ ]*(?:(?:[#.]{1}[-_:a-zA-Z0-9]+)|(?:[a-zA-Z0-9]+=[\w-_:\/.\(\)\（\）]+)|(?:[a-zA-Z0-9]+=["\']{1}[ \w-_:\/.\(\)\（\）]+["\']{1}))+){1,})[ ]*\}@';
@@ -647,6 +660,30 @@ function foo() {
 ~~~
 
 bbb
+EOD;
+        return $markdownText;
+    }
+
+    private function getSampleMarkdownTextWithExtraAttributesDoubleQuotedUsingParenthesis4()
+    {
+        $markdownText = <<<EOD
+aaa
+
+~~~ {.bar #baz lang=en title="foo bar.php スペースも 使えるよ！" }
+function foo() {
+    echo 'hello foo';
+}
+~~~
+
+bbb
+
+~~~ {.baz #foo lang=jp title="FOO BAR.php あいうえお！" }
+function bar() {
+    echo 'hello bar';
+}
+~~~
+
+ccc
 EOD;
         return $markdownText;
     }
